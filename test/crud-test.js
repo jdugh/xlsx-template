@@ -1122,6 +1122,32 @@ describe("CRUD operations", function() {
             });
         });
 
+        it("Image width and height in merge cells", function(done) {
+            fs.readFile(path.join(__dirname, 'templates', 'test-insert-images.xlsx'), function(err, data) {
+                expect(err).toBeNull();
+                var option = {
+                    imageRootPath : path.join(__dirname, 'templates', 'dataset')
+                }
+                var t = new XlsxTemplate(data, option);
+                t.substitute('width_height', {
+                    large : "large.png",
+                    someText : "Hello Image",
+                });
+                var newData = t.generate();
+                fs.writeFileSync('test/output/images_width_height.xlsx', newData, 'binary');
+                var drawing2 = etree.parse(t.archive.file("xl/drawings/drawing2.xml").asText()).getroot();
+                expect(drawing2.findall("xdr:oneCellAnchor")[0].findall("xdr:ext")[0].attrib.cx).toEqual("762000");
+                expect(drawing2.findall("xdr:oneCellAnchor")[0].findall("xdr:ext")[0].attrib.cy).toEqual("234673");
+                expect(drawing2.findall("xdr:oneCellAnchor")[1].findall("xdr:ext")[0].attrib.cx).toEqual("1524000");
+                expect(drawing2.findall("xdr:oneCellAnchor")[1].findall("xdr:ext")[0].attrib.cy).toEqual("469347");
+                expect(drawing2.findall("xdr:oneCellAnchor")[2].findall("xdr:ext")[0].attrib.cx).toEqual("618564");
+                expect(drawing2.findall("xdr:oneCellAnchor")[2].findall("xdr:ext")[0].attrib.cy).toEqual("190500");
+                expect(drawing2.findall("xdr:oneCellAnchor")[3].findall("xdr:ext")[0].attrib.cx).toEqual("1237129");
+                expect(drawing2.findall("xdr:oneCellAnchor")[3].findall("xdr:ext")[0].attrib.cy).toEqual("381000");
+                done();
+            });
+        });
+
         it("pushDownPageBreakOnTableSubstitution option", function(done) {
             fs.readFile(path.join(__dirname, 'templates', 'test-movePageBreakOption.xlsx'), function(err, buffer) {
                 expect(err).toBeNull();
